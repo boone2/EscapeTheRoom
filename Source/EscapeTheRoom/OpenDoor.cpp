@@ -19,7 +19,6 @@ void UOpenDoor::BeginPlay()
     Super::BeginPlay();
     Owner = GetOwner();
     DefaultPlayer = GetWorld()->GetFirstPlayerController()->GetPawn();
-    UE_LOG(LogTemp, Warning, TEXT("Hello I am in OpenDoor! %s"), *Owner->GetName());
 }
 
 
