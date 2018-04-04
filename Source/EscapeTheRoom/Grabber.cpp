@@ -8,47 +8,61 @@
 // Sets default values for this component's properties
 UGrabber::UGrabber()
 {
-    // Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-    // off to improve performance if you don't need them.
-    PrimaryComponentTick.bCanEverTick = true;
+	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
+	// off to improve performance if you don't need them.
+	PrimaryComponentTick.bCanEverTick = true;
 
-    // ...
+	// ...
 }
 
 
 // Called when the game starts
 void UGrabber::BeginPlay()
 {
-    Super::BeginPlay();
+	Super::BeginPlay();
 
-    // ...
-
+	InputComponent = GetOwner()->FindComponentByClass<UInputComponent>();
+	if (InputComponent != nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Find InputComponent"));
+		InputComponent->BindAction("Grab", IE_Pressed, this, &UGrabber::OnGrabPressed);
+		InputComponent->BindAction("Grab", IE_Released, this, &UGrabber::OnGrabReleased);
+	}
 }
 
 
 // Called every frame
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
-    Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-    FVector Start;
-    FRotator Rotator;
-    GetOwner()->GetActorEyesViewPoint(Start, Rotator);
-    FVector End = Start + Rotator.Vector() * 100;
-    
-    DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 0, 0, 10);
+	FVector Start;
+	FRotator Rotator;
+	GetOwner()->GetActorEyesViewPoint(Start, Rotator);
+	FVector End = Start + Rotator.Vector() * 100;
 
-    FHitResult Hit;
-    GetWorld()->LineTraceSingleByObjectType(
-        Hit,
-        Start,
-        End,
-        FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody)
-    );
-    AActor* Actor = Hit.GetActor();
-    if (Actor != nullptr)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Line Hit: %s"), *Actor->GetName());
-    }
+	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 0, 0, 10);
+
+	FHitResult Hit;
+	GetWorld()->LineTraceSingleByObjectType(
+		Hit,
+		Start,
+		End,
+		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody)
+	);
+	AActor* Actor = Hit.GetActor();
+	if (Actor != nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Line Hit: %s"), *Actor->GetName());
+	}
 }
 
+void UGrabber::OnGrabReleased()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Grab action released"));
+}
+
+void UGrabber::OnGrabPressed()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Grab action pressed"));
+}
