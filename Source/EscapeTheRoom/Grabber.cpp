@@ -3,6 +3,7 @@
 #include "Grabber.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/World.h"
+#include "Components/PrimitiveComponent.h"
 
 
 // Sets default values for this component's properties
@@ -24,10 +25,11 @@ void UGrabber::BeginPlay()
 	InputComponent = GetOwner()->FindComponentByClass<UInputComponent>();
 	if (InputComponent != nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Find InputComponent"));
 		InputComponent->BindAction("Grab", IE_Pressed, this, &UGrabber::OnGrabPressed);
 		InputComponent->BindAction("Grab", IE_Released, this, &UGrabber::OnGrabReleased);
 	}
+
+	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
 }
 
 
@@ -36,33 +38,58 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	if (PhysicsHandle->GetGrabbedComponent())
+	{
+		PhysicsHandle->SetTargetLocation(GetLineEnd());
+	}
+}
+
+FVector UGrabber::GetLineStart()
+{
 	FVector Start;
 	FRotator Rotator;
-	GetOwner()->GetActorEyesViewPoint(Start, Rotator);
-	FVector End = Start + Rotator.Vector() * 100;
+	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(Start, Rotator);
+	return Start;
+}
 
-	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 0, 0, 10);
+FVector UGrabber::GetLineEnd()
+{
+	FVector Start;
+	FRotator Rotator;
+	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(Start, Rotator);
+	return Start + Rotator.RotateVector(FVector(200, 0, 0));
+}
 
+FHitResult UGrabber::LineTrace()
+{
 	FHitResult Hit;
 	GetWorld()->LineTraceSingleByObjectType(
 		Hit,
-		Start,
-		End,
-		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody)
+		GetLineStart(),
+		GetLineEnd(),
+		ECC_PhysicsBody
 	);
-	AActor* Actor = Hit.GetActor();
-	if (Actor != nullptr)
+	return Hit;
+}
+
+void UGrabber::OnGrabPressed()
+{
+	FHitResult Hit = LineTrace();
+	AActor *HitActor = Hit.GetActor();
+	UPrimitiveComponent *HitComponent = Hit.GetComponent();
+	if (HitActor && HitComponent)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Line Hit: %s"), *Actor->GetName());
+		PhysicsHandle->GrabComponentAtLocationWithRotation(HitComponent, NAME_None, HitActor->GetActorLocation(), HitActor->GetActorRotation());
+		UE_LOG(LogTemp, Display, TEXT("Grab %s"), *HitActor->GetName());
 	}
 }
 
 void UGrabber::OnGrabReleased()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Grab action released"));
-}
-
-void UGrabber::OnGrabPressed()
-{
-	UE_LOG(LogTemp, Warning, TEXT("Grab action pressed"));
+	UPrimitiveComponent *GrabbedComponent = PhysicsHandle->GetGrabbedComponent();
+	if (GrabbedComponent)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Release %s"), *GrabbedComponent->GetOwner()->GetName());
+		PhysicsHandle->ReleaseComponent();
+	}
 }
