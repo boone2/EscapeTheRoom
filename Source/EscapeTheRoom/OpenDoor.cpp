@@ -27,6 +27,8 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	float mass = CalcTotalMassInTriggerVolumn();
+
     if (Trigger != nullptr && Trigger->IsOverlappingActor(DefaultPlayer))
     {
         OpenDoor();
@@ -47,5 +49,19 @@ void UOpenDoor::OpenDoor()
 void UOpenDoor::CloseDoor()
 {
     Owner->SetActorRelativeRotation(FRotator(0, 0, 0));
+}
+
+float UOpenDoor::CalcTotalMassInTriggerVolumn()
+{
+	if (Trigger)
+	{
+		TArray<AActor*> OverlappingActors;
+		Trigger->GetOverlappingActors(OUT OverlappingActors, AActor::StaticClass());
+		for(AActor* actor : OverlappingActors)
+		{
+
+		}
+	}
+	return 0.0f;
 }
 

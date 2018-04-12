@@ -35,6 +35,7 @@ public:
 private:
     void OpenDoor();
     void CloseDoor();
+	float CalcTotalMassInTriggerVolumn();
 
     AActor *Owner;
     AActor *DefaultPlayer;    
