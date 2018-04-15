@@ -2,6 +2,7 @@
 
 #include "OpenDoor.h"
 #include "Engine/World.h"
+#include "Components/PrimitiveComponent.h"
 
 
 // Sets default values for this component's properties
@@ -27,9 +28,10 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	float mass = CalcTotalMassInTriggerVolumn();
+    float mass = CalcTotalMassInTriggerVolumn();
 
-    if (Trigger != nullptr && Trigger->IsOverlappingActor(DefaultPlayer))
+    UE_LOG(LogTemp, Display, TEXT("Total mass: %f"), mass);
+    if (mass >= OpenDoorMass)
     {
         OpenDoor();
         LastDoorOpenTime = GetWorld()->GetTimeSeconds();
@@ -53,15 +55,18 @@ void UOpenDoor::CloseDoor()
 
 float UOpenDoor::CalcTotalMassInTriggerVolumn()
 {
-	if (Trigger)
-	{
-		TArray<AActor*> OverlappingActors;
-		Trigger->GetOverlappingActors(OUT OverlappingActors, AActor::StaticClass());
-		for(AActor* actor : OverlappingActors)
-		{
+    if (nullptr == Trigger)
+        return 0;
 
-		}
-	}
-	return 0.0f;
+    TArray<AActor*> OverlappingActors;
+    Trigger->GetOverlappingActors(OUT OverlappingActors, AActor::StaticClass());
+    float totalMass = 0;
+    for (const AActor* actor : OverlappingActors)
+    {
+        auto component = actor->FindComponentByClass<UPrimitiveComponent>();
+        float mass = component->GetMass();
+        totalMass += mass;
+    }
+    return totalMass;
 }
 

@@ -32,6 +32,9 @@ public:
     UPROPERTY(EditAnywhere)
     float DoorOpenDuration;
 
+    UPROPERTY(EditAnywhere)
+    float OpenDoorMass;
+
 private:
     void OpenDoor();
     void CloseDoor();
