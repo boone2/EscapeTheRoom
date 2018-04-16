@@ -7,6 +7,7 @@
 #include "Engine/TriggerVolume.h"
 #include "OpenDoor.generated.h" 
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDoorEvent);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class ESCAPETHEROOM_API UOpenDoor : public UActorComponent
@@ -34,6 +35,12 @@ public:
 
     UPROPERTY(EditAnywhere)
     float OpenDoorMass;
+
+    UPROPERTY(BlueprintAssignable)
+    FDoorEvent OnOpen;
+
+    UPROPERTY(BlueprintAssignable)
+    FDoorEvent OnClose;
 
 private:
     void OpenDoor();

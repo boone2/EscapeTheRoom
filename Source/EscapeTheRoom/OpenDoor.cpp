@@ -45,12 +45,12 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 
 void UOpenDoor::OpenDoor()
 {
-    Owner->SetActorRelativeRotation(FRotator(0, 90, 0));
+    OnOpen.Broadcast();
 }
 
 void UOpenDoor::CloseDoor()
 {
-    Owner->SetActorRelativeRotation(FRotator(0, 0, 0));
+    OnClose.Broadcast();
 }
 
 float UOpenDoor::CalcTotalMassInTriggerVolumn()
