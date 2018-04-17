@@ -30,14 +30,11 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 
     float mass = CalcTotalMassInTriggerVolumn();
 
-    UE_LOG(LogTemp, Display, TEXT("Total mass: %f"), mass);
     if (mass >= OpenDoorMass)
     {
         OpenDoor();
-        LastDoorOpenTime = GetWorld()->GetTimeSeconds();
     }
-
-    if (GetWorld()->GetTimeSeconds() - LastDoorOpenTime > DoorOpenDuration)
+    else
     {
         CloseDoor();
     }
